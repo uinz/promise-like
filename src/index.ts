@@ -42,13 +42,29 @@ function resolveNext(
       );
     }
   } else {
-    resolve(x);
+    if (x instanceof Error) {
+      reject(x);
+    } else {
+      resolve(x);
+    }
   }
 }
 
 class Next {
-  // public static resolve = (value: any): Next => {
-  // }
+  public static resolve = (value: any): Next => {
+    const next = new Next(((resolve, reject) => {
+      resolveNext(next, value, resolve, reject);
+    }));
+    return next;
+  }
+
+  public static reject = (reason: Error): Next => {
+    const next = new Next(((resolve, reject) => {
+      resolveNext(next, reason, resolve, reject);
+    }));
+    return next;
+  }
+
   private value?: any;
   private reason?: Error;
   private status: Status = Status.PENDING;
